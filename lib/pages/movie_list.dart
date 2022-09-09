@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_movie_api/service/http_service.dart';
 
@@ -12,17 +11,18 @@ class MovieList extends StatefulWidget {
 }
 
 class _MovieListState extends State<MovieList> {
-  late List movies;
-  late HttpService service;
+  List? movies;
+  HttpService? service;
   int? count;
 
   Future initialize() async {
     movies = [];
-    movies = (await service.getPopularMovies())!;
-
+    movies = await service!.getPopularMovies();
+    count = movies!.length;
     setState(() {
+      count = movies!.length;
       movies = movies;
-      count = movies.length;
+      print(count);
     });
   }
 
@@ -50,11 +50,11 @@ class _MovieListState extends State<MovieList> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (_) => MovieDetail(movies[index])));
+                          builder: (_) => MovieDetail(movies?[index])));
                 },
-                title: Text(movies[index].title), //movies[index].title
+                title: Text(movies?[index].title), //movies[index].title
                 subtitle: Text(
-                    'Rating : ${movies[index].voteAverage}'), //'Rating : ${movies[index].voteAverage}'
+                    'Rating : ${movies?[index].voteAverage}'), //'Rating : ${movies[index].voteAverage}'
               ),
             );
           }),
