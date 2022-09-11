@@ -11,25 +11,10 @@ class MovieList extends StatefulWidget {
 }
 
 class _MovieListState extends State<MovieList> {
-  List? movies;
-  HttpService? service;
-  int? count;
-
-  Future initialize() async {
-    movies = [];
-    movies = await service!.getPopularMovies();
-    count = movies!.length;
-    setState(() {
-      count = movies!.length;
-      movies = movies;
-      print(count);
-    });
-  }
+  HttpService service = HttpService();
 
   @override
   void initState() {
-    service = HttpService();
-    initialize();
     super.initState();
   }
 
@@ -39,25 +24,39 @@ class _MovieListState extends State<MovieList> {
         appBar: AppBar(
           title: const Text("Popular Movies"),
         ),
-        body: ListView.builder(
-          itemCount: count,
-          itemBuilder: ((context, index) {
-            return Card(
-              color: Colors.white,
-              elevation: 2.0,
-              child: ListTile(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => MovieDetail(movies?[index])));
-                },
-                title: Text(movies?[index].title), //movies[index].title
-                subtitle: Text(
-                    'Rating : ${movies?[index].voteAverage}'), //'Rating : ${movies[index].voteAverage}'
-              ),
-            );
-          }),
+        body: FutureBuilder<List?>(
+          future: service.getPopularMovies(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Padding(
+                padding: EdgeInsets.all(5),
+                child: ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: ((context, index) {
+                    return Card(
+                      color: Colors.white,
+                      elevation: 2.0,
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      MovieDetail(snapshot.data![index])));
+                        },
+                        title: Text(
+                            snapshot.data![index].title), //movies[index].title
+                        subtitle: Text(
+                            'Rating : ${snapshot.data![index].voteAverage}'), //'Rating : ${movies[index].voteAverage}'
+                      ),
+                    );
+                  }),
+                ),
+              );
+            } else {
+              return Center(child: Text('Wait for a second.....'));
+            }
+          },
         ));
   }
 }
